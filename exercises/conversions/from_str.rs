@@ -49,15 +49,51 @@ enum ParsePersonError {
 // you want to return a string error message, you can do so via just using
 // return `Err("my error message".into())`.
 
+use std::num::ParseIntError;
+use std::str::FromStr;
+
+#[derive(Debug)]
+struct Person {
+    name: String,
+    age: u32,
+}
+
+#[derive(Debug)]
+enum ParsePersonError {
+    InvalidFormat,
+    ParseIntError(ParseIntError),
+}
+
+impl From<ParseIntError> for ParsePersonError {
+    fn from(error: ParseIntError) -> Self {
+        ParsePersonError::ParseIntError(error)
+    }
+}
+
 impl FromStr for Person {
     type Err = ParsePersonError;
-    fn from_str(s: &str) -> Result<Person, Self::Err> {
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let parts: Vec<&str> = s.split(',').collect();
+        if parts.len() != 2 {
+            return Err(ParsePersonError::InvalidFormat);
+        }
+
+        let name = parts[0].trim().to_string();
+        let age = u32::from_str(parts[1].trim())?;
+
+        Ok(Person { name, age })
     }
 }
 
 fn main() {
-    let p = "Mark,20".parse::<Person>().unwrap();
-    println!("{:?}", p);
+    let person_str = "John Doe, 30";
+    let person: Result<Person, ParsePersonError> = person_str.parse();
+
+    match person {
+        Ok(p) => println!("{:?}", p),
+        Err(e) => println!("{:?}", e),
+    }
 }
 
 #[cfg(test)]

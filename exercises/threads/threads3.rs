@@ -3,10 +3,11 @@
 // Execute `rustlings hint threads3` or use the `hint` watch subcommand for a
 // hint.
 
-// I AM NOT DONE
 
-use std::sync::mpsc;
-use std::sync::Arc;
+
+
+
+use std::sync::{mpsc, Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 
@@ -26,34 +27,42 @@ impl Queue {
     }
 }
 
-fn send_tx(q: Queue, tx: mpsc::Sender<u32>) -> () {
-    let qc = Arc::new(q);
-    let qc1 = Arc::clone(&qc);
-    let qc2 = Arc::clone(&qc);
-
-    thread::spawn(move || {
-        for val in &qc1.first_half {
+fn send_tx(q: Arc<Mutex<Queue>>, tx: Arc<Mutex<mpsc::Sender<u32>>>) {
+    let qc1 = Arc::clone(&q);
+    let tc1 = Arc::clone(&tx);
+    let thread1 = thread::spawn(move || {
+        let queue = qc1.lock().unwrap();
+        let sender = tc1.lock().unwrap();
+        for val in &queue.first_half {
             println!("sending {:?}", val);
-            tx.send(*val).unwrap();
+            sender.send(*val).unwrap();
             thread::sleep(Duration::from_secs(1));
         }
     });
 
-    thread::spawn(move || {
-        for val in &qc2.second_half {
+    let qc2 = Arc::clone(&q);
+    let tc2 = Arc::clone(&tx);
+    let thread2 = thread::spawn(move || {
+        let queue = qc2.lock().unwrap();
+        let sender = tc2.lock().unwrap();
+        for val in &queue.second_half {
             println!("sending {:?}", val);
-            tx.send(*val).unwrap();
+            sender.send(*val).unwrap();
             thread::sleep(Duration::from_secs(1));
         }
     });
+
+    thread1.join().unwrap();
+    thread2.join().unwrap();
 }
 
 fn main() {
     let (tx, rx) = mpsc::channel();
-    let queue = Queue::new();
-    let queue_length = queue.length;
-
-    send_tx(queue, tx);
+    let queue = Arc::new(Mutex::new(Queue::new()));
+    let sender = Arc::new(Mutex::new(tx));
+    let queue_length = queue.lock().unwrap().length;
+    
+    send_tx(queue, sender);
 
     let mut total_received: u32 = 0;
     for received in rx {
@@ -62,5 +71,280 @@ fn main() {
     }
 
     println!("total numbers received: {}", total_received);
-    assert_eq!(total_received, queue_length)
+    assert_eq!(total_received, queue_length);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
