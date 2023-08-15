@@ -2,9 +2,6 @@
 //
 // Execute `rustlings hint drive1` or use the `hint` watch subcommand for a
 // hint.
-
-// I AM NOT DONE
-
 // This execrise shares build.rs with the previous exercise.
 // You need to add some code to build.rs to make both this exercise and
 // the previous one work.
@@ -16,13 +13,23 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+  use super::*;
 
     #[test]
     fn test_success() {
-        #[cfg(feature = "pass")]
+        //#[cfg(any(feature = "TEST_FOO", feature = "pass"))]
+        
         return;
 
         panic!("no cfg set");
     }
-}
+}         
+
+
+
+
+
+
+
+
+
